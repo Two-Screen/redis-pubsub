@@ -1,0 +1,29 @@
+{
+    "name": "redis-pubsub",
+    "description": "Simple pub/sub interface to Redis",
+    "version": "0.0.1",
+    "author": "Stéphan Kochen <stephan@angrybytes.com>",
+    "keywords": ["redis", "pubsub"],
+    "license": "MIT",
+
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/AngryBytes/redis-pubsub.git"
+    },
+    "private": true,
+
+    "engines": {
+        "node": ">=0.4.0"
+    },
+    "dependencies": {
+        "redis": "0.7"
+    },
+    "devDependencies": {
+        "tap": "0.0.x"
+    },
+
+    "main": "index.js",
+    "scripts": {
+        "test": "tap test.js"
+    }
+}
