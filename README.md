@@ -28,15 +28,15 @@ There are two alternate ways to create a channel:
  * Using an existing RedisClient as the publisher. This will 'clone' the
    connection for the subscriber, using the same host, port and options.
 
-       var client = redis.createClient(...);
-       var channel = pubsub.createChannel(client, channel);
+        var client = redis.createClient(...);
+        var channel = pubsub.createChannel(client, channel);
 
  * Explicitely specify both publisher and subscriber clients. This allows
    for sharing subscribers, or master-slave setups.
 
-       var publisher = redis.createClient(...);
-       var subscriber = redis.createClient(...);
-       var channel = pubsub.createChannel(publisher, subscriber, channel);
+        var publisher = redis.createClient(...);
+        var subscriber = redis.createClient(...);
+        var channel = pubsub.createChannel(publisher, subscriber, channel);
 
 In either case, provided RedisClient instances will never be closed on `end()`.
 Instances created by redis-pubsub itself will be, and will also have their
