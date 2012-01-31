@@ -18,7 +18,7 @@
         "redis": "0.7"
     },
     "devDependencies": {
-        "tap": "0.0.x"
+        "tap": "0.2"
     },
 
     "main": "index.js",
