@@ -1,5 +1,5 @@
 **redis-pubsub** provides a simple interface to a single pub/sub channel on a
-Redis server. [![Build Status](https://secure.travis-ci.org/AngryBytes/redis-pubsub.png)](http://travis-ci.org/AngryBytes/redis-pubsub)
+Redis server. [![Build Status](https://secure.travis-ci.org/Two-Screen/redis-pubsub.png)](http://travis-ci.org/Two-Screen/redis-pubsub)
 
     var pubsub = require('redis-pubsub');
 
