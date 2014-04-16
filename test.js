@@ -69,7 +69,7 @@ function test_with_client(name, callback) {
             origEnd();
         };
 
-        client.once('ready', function() {
+        client.once('connect', function() {
             callback(t, client);
         });
     });
@@ -88,8 +88,8 @@ test('open a channel', function(t) {
     t.pass('rapidly close a channel');
 
     channel = pubsub.createChannel(options.port, options.bind, 'foo');
-    channel.on('ready', function() {
-        t.pass('open a channel and wait for \'ready\'');
+    channel.on('connect', function() {
+        t.pass('open a channel and wait for \'connect\'');
 
         channel.end();
         t.pass('close a channel');
@@ -125,7 +125,7 @@ test_with_client('publish messages', function(t, pub) {
     var channel1 = pubsub.createChannel(pub, 'foo');
     var channel2 = pubsub.createChannel(pub, 'foo');
 
-    channel2.on('ready', function() {
+    channel2.on('connect', function() {
         channel2.on('message', function(m) {
             channel1.end();
             channel2.end();
@@ -144,7 +144,7 @@ test_with_client('publish raw messages', function(t, pub) {
     var channel2 = pubsub.createChannel(pub, 'foo');
     channel1.raw = channel2.raw = true;
 
-    channel2.on('ready', function() {
+    channel2.on('connect', function() {
         channel2.on('message', function(m) {
             channel1.end();
             channel2.end();

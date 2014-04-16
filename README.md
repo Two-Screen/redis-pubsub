@@ -5,7 +5,7 @@ Redis server. [![Build Status](https://secure.travis-ci.org/Two-Screen/redis-pub
 
     // Subscribe to channel 'foobar' on a local server.
     var channel = pubsub.createChannel(6379, 'localhost', 'foobar');
-    channel.on('ready', function() {
+    channel.on('connect', function() {
         channel.on('message', function(msg) {
             console.log(msg.greeting);
             channel.end();
@@ -13,7 +13,7 @@ Redis server. [![Build Status](https://secure.travis-ci.org/Two-Screen/redis-pub
         channel.send({ greeting: 'Hello world!' });
     });
 
-Waiting for the `ready` event is optional. The converse is the `close` event.
+Waiting for the `connect` event is optional. The converse is the `end` event.
 
 Messages are serialized to JSON by default, so you can send regular objects
 across the wire. If this is undesirable, set the `raw` property:

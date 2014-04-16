@@ -25,35 +25,33 @@ Channel.prototype._setup = function() {
     var errorHandler = this.emit.bind(this, 'error');
 
     // Publisher handling.
-    this.pubReadyEvent = this.pub.options.no_ready_check ? 'connect' : 'ready';
-    this.pub.on(this.pubReadyEvent, this.pubReadyHandler = function() {
+    this.pub.on('connect', this.pubReadyHandler = function() {
         this.ready = this.subscribed;
-        if (this.ready) this.emit('ready');
+        if (this.ready) this.emit('connect');
     }.bind(this));
 
     if (this.pubOwner) this.pub.on('error', errorHandler);
 
-    this.pub.on('close', this.pubCloseHandler = function() {
-        if (this.ready) this.emit('close');
+    this.pub.on('end', this.pubCloseHandler = function() {
+        if (this.ready) this.emit('end');
         this.ready = null;
     }.bind(this));
 
     // Subscriber handling.
-    this.subReadyEvent = this.sub.options.no_ready_check ? 'connect' : 'ready';
-    this.sub.on(this.subReadyEvent, this.subReadyHandler = function() {
+    this.sub.on('connect', this.subReadyHandler = function() {
         this.sub.subscribe(this.chan);
     }.bind(this));
     this.sub.on('subscribe', this.subSubscribeHandler = function(c) {
         if (!this.sub || this.subscribed || c !== this.chan) return;
         this.subscribed = true;
         this.ready = this.pub.ready;
-        if (this.ready) this.emit('ready');
+        if (this.ready) this.emit('connect');
     }.bind(this));
 
     if (this.subOwner) this.sub.on('error', errorHandler);
 
-    this.sub.on('close', this.subCloseHandler = function() {
-        if (this.ready) this.emit('close');
+    this.sub.on('end', this.subCloseHandler = function() {
+        if (this.ready) this.emit('end');
         this.subscribed = this.ready = false;
     }.bind(this));
 
@@ -76,12 +74,11 @@ Channel.prototype.end = function() {
         }
         else {
             if (this.pubReadyHandler) {
-                this.pub.removeListener(
-                    this.pubReadyEvent, this.pubReadyHandler);
+                this.pub.removeListener('connect', this.pubReadyHandler);
                 this.pubReadyEvent = this.pubReadyHandler = null;
             }
             if (this.pubCloseHandler) {
-                this.pub.removeListener('close', this.pubCloseHandler);
+                this.pub.removeListener('end', this.pubCloseHandler);
                 this.pubCloseHandler = null;
             }
         }
@@ -97,12 +94,11 @@ Channel.prototype.end = function() {
         }
         else {
             if (this.subReadyHandler) {
-                this.sub.removeListener(
-                    this.subReadyEvent, this.subReadyHandler);
+                this.sub.removeListener('connect', this.subReadyHandler);
                 this.subReadyEvent = this.subReadyHandler = null;
             }
             if (this.subCloseHandler) {
-                this.sub.removeListener('close', this.subCloseHandler);
+                this.sub.removeListener('end', this.subCloseHandler);
                 this.subCloseHandler = null;
             }
             if (this.subMessageHandler) {
