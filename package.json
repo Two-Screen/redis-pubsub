@@ -11,14 +11,11 @@
         "url": "https://github.com/Two-Screen/redis-pubsub.git"
     },
 
-    "engines": {
-        "node": ">=0.4.0"
-    },
     "dependencies": {
-        "redis": "0.7"
+        "redis": "0.10"
     },
     "devDependencies": {
-        "tap": "0.2"
+        "tap": "0.4"
     },
 
     "main": "index.js",
