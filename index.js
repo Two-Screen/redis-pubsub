@@ -22,7 +22,9 @@ Channel.prototype._setup = function() {
     // `end()` may have been called already.
     if (!this.pub) return;
 
-    var errorHandler = this.emit.bind(this, 'error');
+    this.errorHandler = function(err) {
+        if (err) this.emit('error', err);
+    }.bind(this);
 
     // Publisher handling.
     this.pub.on('connect', this.pubReadyHandler = function() {
@@ -30,7 +32,7 @@ Channel.prototype._setup = function() {
         if (this.ready) this.emit('connect');
     }.bind(this));
 
-    if (this.pubOwner) this.pub.on('error', errorHandler);
+    if (this.pubOwner) this.pub.on('error', this.errorHandler);
 
     this.pub.on('end', this.pubCloseHandler = function() {
         if (this.ready) this.emit('end');
@@ -48,7 +50,7 @@ Channel.prototype._setup = function() {
         if (this.ready) this.emit('connect');
     }.bind(this));
 
-    if (this.subOwner) this.sub.on('error', errorHandler);
+    if (this.subOwner) this.sub.on('error', this.errorHandler);
 
     this.sub.on('end', this.subCloseHandler = function() {
         if (this.ready) this.emit('end');
@@ -115,6 +117,7 @@ Channel.prototype.end = function() {
 
 Channel.prototype.send = function(message, callback) {
     if (!this.raw) message = JSON.stringify(message);
+    if (!callback) callback = this.errorHandler;
     return this.pub.publish([this.chan, message], callback);
 };
 
