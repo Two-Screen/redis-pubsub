@@ -12,12 +12,13 @@ function createConnection(port, host) {
     var _write = s.write;
 
     s.write = function() {
-        var i, args = arguments;
-        _write.call(s, "*" + args.length + "\r\n");
-        for (i = 0; i < args.length; i++) {
+        var i, args = arguments, length = args.length;
+        var str = "*" + length + "\r\n";
+        for (i = 0; i < length; i++) {
             var arg = args[i];
-            _write.call(s, "$" + Buffer.byteLength(arg) + "\r\n" + arg + "\r\n");
+            str += "$" + Buffer.byteLength(arg) + "\r\n" + arg + "\r\n";
         }
+        _write.call(s, str);
     };
 
     s.on("data", function(data) {
