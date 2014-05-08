@@ -1,6 +1,5 @@
 var spawn  = require('child_process').spawn;
 var tap    = require('tap');
-var redis  = require('redis');
 var pubsub = require('./');
 
 
@@ -43,7 +42,7 @@ function spawnRedis(callback) {
 function test(name, callback) {
     tap.test(name, function(t) {
         spawnRedis(function(err, child) {
-            if (err) throw err
+            if (err) throw err;
 
             var origEnd = t.end.bind(t);
             t.end = function() {
@@ -58,23 +57,6 @@ function test(name, callback) {
     });
 }
 
-// A test case using a redis server and RedisClient.
-function test_with_client(name, callback) {
-    test(name, function(t) {
-        var client = redis.createClient(options.port, options.bind);
-
-        var origEnd = t.end.bind(t);
-        t.end = function() {
-            client.end();
-            origEnd();
-        };
-
-        client.once('connect', function() {
-            callback(t, client);
-        });
-    });
-}
-
 
 // Test cases follow.
 
@@ -84,74 +66,51 @@ test('open a channel', function(t) {
     channel = pubsub.createChannel(options.port, options.bind, 'foo');
     t.pass('open a channel');
 
-    channel.end();
+    channel.destroy();
     t.pass('rapidly close a channel');
 
     channel = pubsub.createChannel(options.port, options.bind, 'foo');
     channel.on('connect', function() {
         t.pass('open a channel and wait for \'connect\'');
 
-        channel.end();
+        channel.destroy();
         t.pass('close a channel');
 
         t.end();
     });
 });
 
-test_with_client('open a channel using a client', function(t, client) {
-    var pub = client;
-    var sub = redis.createClient(pub.port, pub.host, pub.options);
-    var channel;
-
-    channel = pubsub.createChannel(pub, 'foo');
-    t.pass('open a channel using the client');
-
-    channel.end();
-    t.pass('close a channel');
-
-    channel = pubsub.createChannel(pub, sub, 'foo');
-    t.pass('open a channel using two clients');
-
-    channel.end();
-    t.pass('close a channel');
-
-    sub.end();
-    t.end();
-});
-
-test_with_client('publish messages', function(t, pub) {
+test('publish messages', function(t, pub) {
     t.plan(2);
 
-    var channel1 = pubsub.createChannel(pub, 'foo');
-    var channel2 = pubsub.createChannel(pub, 'foo');
+    var channel1 = pubsub.createChannel(options.port, options.bind, 'foo');
+    var channel2 = pubsub.createChannel(options.port, options.bind, 'foo');
 
     channel2.on('connect', function() {
         channel2.on('message', function(m) {
-            channel1.end();
-            channel2.end();
+            channel1.destroy();
+            channel2.destroy();
             t.equal(m.x, 'bla', 'receive the message');
         });
-        channel1.send({ x: 'bla' }, function() {
-            t.pass('send a message');
-        });
+        channel1.send({ x: 'bla' });
+        t.pass('send a message');
     });
 });
 
-test_with_client('publish raw messages', function(t, pub) {
+test('publish raw messages', function(t, pub) {
     t.plan(2);
 
-    var channel1 = pubsub.createChannel(pub, 'foo');
-    var channel2 = pubsub.createChannel(pub, 'foo');
+    var channel1 = pubsub.createChannel(options.port, options.bind, 'foo');
+    var channel2 = pubsub.createChannel(options.port, options.bind, 'foo');
     channel1.raw = channel2.raw = true;
 
     channel2.on('connect', function() {
         channel2.on('message', function(m) {
-            channel1.end();
-            channel2.end();
+            channel1.destroy();
+            channel2.destroy();
             t.equal(m, 'bla', 'receive the message');
         });
-        channel1.send('bla', function() {
-            t.pass('send a message');
-        });
+        channel1.send('bla');
+        t.pass('send a message');
     });
 });
