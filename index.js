@@ -1,11 +1,45 @@
+var net     = require('net');
 var util    = require('util');
 var events  = require('events');
 var hiredis = require('hiredis');
 
 
+// This function was taken and modified from hiredis. BSD licensed.
+// Problem was that the default write method doesn't account for unicode.
+function createConnection(port, host) {
+    var s = net.createConnection(port || 6379, host);
+    var r = new hiredis.Reader();
+    var _write = s.write;
+
+    s.write = function() {
+        var i, args = arguments;
+        _write.call(s, "*" + args.length + "\r\n");
+        for (i = 0; i < args.length; i++) {
+            var arg = args[i];
+            _write.call(s, "$" + Buffer.byteLength(arg) + "\r\n" + arg + "\r\n");
+        }
+    };
+
+    s.on("data", function(data) {
+        var reply;
+        r.feed(data);
+        try {
+            while((reply = r.get()) !== undefined)
+                s.emit("reply", reply);
+        } catch(err) {
+            r = null;
+            s.emit("error", err);
+            s.destroy();
+        }
+    });
+
+    return s;
+}
+
+
 function Channel(port, host, chan) {
-    this.pub = hiredis.createConnection(port, host);
-    this.sub = hiredis.createConnection(port, host);
+    this.pub = createConnection(port, host);
+    this.sub = createConnection(port, host);
     this.chan = chan;
     this.raw = false;
 
