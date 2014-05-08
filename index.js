@@ -21,15 +21,21 @@ function createConnection(port, host) {
     };
 
     s.on("data", function(data) {
-        var reply;
         r.feed(data);
-        try {
-            while((reply = r.get()) !== undefined)
-                s.emit("reply", reply);
-        } catch(err) {
-            r = null;
-            s.emit("error", err);
-            s.destroy();
+        while (true) {
+            var reply;
+            try {
+                reply = r.get();
+            }
+            catch (err) {
+                s.emit('error', err);
+                s.destroy();
+                break;
+            }
+            if (reply === undefined) {
+                break;
+            }
+            s.emit("reply", reply);
         }
     });
 
