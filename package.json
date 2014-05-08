@@ -1,7 +1,7 @@
 {
     "name": "redis-pubsub",
     "description": "Simple pub/sub interface to Redis",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "author": "Stéphan Kochen <stephan@angrybytes.com>",
     "keywords": ["redis", "pubsub"],
     "license": "MIT",
