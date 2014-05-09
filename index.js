@@ -68,10 +68,8 @@ function Channel(port, host, chan) {
     }.bind(this));
 
     this.pub.on('close', function() {
-        var wasReady = this.ready;
         this.pub = null;
         this.destroy();
-        if (wasReady) this.emit('close');
     }.bind(this));
 
     this.pub.on('error', function(err) {
@@ -110,10 +108,8 @@ function Channel(port, host, chan) {
     }.bind(this));
 
     this.sub.on('close', function() {
-        var wasReady = this.ready;
         this.sub = null;
         this.destroy();
-        if (wasReady) this.emit('close');
     }.bind(this));
 
     this.sub.on('error', function(err) {
@@ -124,6 +120,7 @@ util.inherits(Channel, events.EventEmitter);
 
 
 Channel.prototype.destroy = function() {
+    var wasReady = this.ready;
     this.ready = this._pubReady = this._subReady = false;
 
     if (this.pub) {
@@ -135,6 +132,8 @@ Channel.prototype.destroy = function() {
         this.sub.destroy();
         this.sub = null;
     }
+
+    if (wasReady) this.emit('close');
 };
 
 
