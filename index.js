@@ -141,7 +141,7 @@ Channel.prototype.destroy = function() {
 Channel.prototype.send = function(message) {
     if (!this.raw)
         message = JSON.stringify(message);
-    this.pub.command('PUBLISH', this.chan, message);
+    this.pub.command('publish', this.chan, message);
 };
 
 
