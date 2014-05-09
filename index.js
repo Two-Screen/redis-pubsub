@@ -53,6 +53,17 @@ function Channel(port, host, chan) {
     this._pubReady = false;
     this._subReady = false;
 
+    var emitError = function(err) {
+        this.emit('error', err);
+        this.destroy();
+    }.bind(this);
+
+    var badReply = function(side, reply) {
+        var err = new Error("Bad " + side + " reply");
+        err.reply = reply;
+        emitError(err);
+    };
+
     // Publisher handling.
     this.pub.on('connect', function() {
         this._pubReady = true;
@@ -62,9 +73,9 @@ function Channel(port, host, chan) {
 
     this.pub.on('reply', function(reply) {
         if (reply instanceof Error)
-            return this.pub.emit('error', reply);
+            return emitError(reply);
         if (typeof(reply) !== 'number')
-            return this.pub.emit('error', new Error("Bad pub reply"));
+            return badReply('pub', reply);
     }.bind(this));
 
     this.pub.on('close', function() {
@@ -72,9 +83,7 @@ function Channel(port, host, chan) {
         this.destroy();
     }.bind(this));
 
-    this.pub.on('error', function(err) {
-        this.emit('error', err);
-    }.bind(this));
+    this.pub.on('error', emitError);
 
     // Subscriber handling.
     this.sub.on('connect', function() {
@@ -83,12 +92,12 @@ function Channel(port, host, chan) {
 
     this.sub.on('reply', function(reply) {
         if (reply instanceof Error)
-            return this.sub.emit('error', reply);
+            return emitError(reply);
         if (!Array.isArray(reply))
             return badReply('sub', reply);
         if (reply[0] === 'subscribe') {
             if (this._subscribed || reply[1] !== this.chan || reply[2] !== 1)
-                return this.sub.emit('error', new Error("Bad sub reply"));
+                return badReply('sub', reply);
             this._subReady = true;
             this.ready = this._pubReady;
             if (this.ready) this.emit('connect');
@@ -96,15 +105,15 @@ function Channel(port, host, chan) {
         }
         if (reply[0] === 'message') {
             if (reply[1] !== this.chan)
-                return this.sub.emit('error', new Error("Bad sub reply"));
+                return badReply('sub', reply);
             var msg = reply[2];
             if (!this.raw) {
                 try { msg = JSON.parse(msg); }
-                catch (err) { return this.sub.emit('error', err); }
+                catch (err) { return emitError(err); }
             }
             return this.emit('message', msg);
         }
-        return this.sub.emit('error', new Error("Bad sub reply"));
+        return badReply('sub', reply);
     }.bind(this));
 
     this.sub.on('close', function() {
@@ -112,9 +121,7 @@ function Channel(port, host, chan) {
         this.destroy();
     }.bind(this));
 
-    this.sub.on('error', function(err) {
-        this.emit('error', err);
-    }.bind(this));
+    this.sub.on('error', emitError);
 }
 util.inherits(Channel, events.EventEmitter);
 
