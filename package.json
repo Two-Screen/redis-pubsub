@@ -12,10 +12,10 @@
     },
 
     "dependencies": {
-        "hiredis": "0.1"
+        "hiredis": "0.2"
     },
     "devDependencies": {
-        "tap": "0.4"
+        "tap": "0.5"
     },
 
     "main": "index.js",
